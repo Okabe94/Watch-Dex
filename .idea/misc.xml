@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_android_black_24dp.xml" value="0.1445" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_bug_type.xml" value="0.1445" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_clear_all.xml" value="0.1915" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_dark_type.xml" value="0.1445" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_dragon_type.xml" value="0.102" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_electric_type.xml" value="0.1445" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_fairy_type.xml" value="0.1445" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_fighting_type.xml" value="0.1445" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_fire_type.xml" value="0.1445" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_flying_type.xml" value="0.1445" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_ghost_type.xml" value="0.1445" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_grass_type.xml" value="0.1445" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_ground_type.xml" value="0.1445" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_ice_type.xml" value="0.1445" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_normal_type.xml" value="0.1445" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_poison_type.xml" value="0.1445" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_pokeball.xml" value="0.102" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_psychic_type.xml" value="0.1445" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_rock_type.xml" value="0.1445" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_steel_type.xml" value="0.1445" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/drawable/ic_water_type.xml" value="0.1445" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/mipmap-anydpi-v26/ic_launcher_3_round.xml" value="0.1445" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/mipmap-anydpi-v26/ic_watchdex_launcher.xml" value="0.1915" />
+        <entry key="..\:/Proyectos/Android/WatchDex/app/src/main/res/mipmap-anydpi-v26/ic_watchdex_launcher_round.xml" value="0.1915" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>

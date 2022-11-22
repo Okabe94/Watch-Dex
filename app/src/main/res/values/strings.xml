@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Watch Dex</string>
+
+    <!-- Pokemon type -->
+    <string name="steel_type">Steel</string>
+    <string name="water_type">Water</string>
+    <string name="bug_type">Bug</string>
+    <string name="dragon_type">Dragon</string>
+    <string name="electric_type">Electric</string>
+    <string name="ghost_type">Ghost</string>
+    <string name="fairy_type">Fairy</string>
+    <string name="fire_type">Fire</string>
+    <string name="ice_type">Ice</string>
+    <string name="fighting_type">Fighting</string>
+    <string name="normal_type">Normal</string>
+    <string name="grass_type">Grass</string>
+    <string name="psychic_type">Psychic</string>
+    <string name="rock_type">Rock</string>
+    <string name="dark_type">Dark</string>
+    <string name="ground_type">Ground</string>
+    <string name="poison_type">Poison</string>
+    <string name="flying_type">Flying</string>
+
+    <!-- Content description -->
+    <string name="cd_clear_all">clear all</string>
+    <string name="cd_select">select</string>
+    <string name="cd_collapse">collapse</string>
+
+    <string name="clear">clear all</string>
+    <string name="offensive_side">Offensive</string>
+    <string name="defensive_side">Defensive</string>
+    <string name="deals_damage">Deals x%s damage to</string>
+    <string name="takes_damage">Takes x%s damage from</string>
+    <string name="select_by_type_title">Select the type</string>
+    <string name="list_legend">(M): Mega Evolution\n(A): Alolan Form\n(G): Galarian Form</string>
+
+</resources>

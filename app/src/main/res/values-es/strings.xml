@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Watch Dex</string>
+
+    <!-- Pokemon type -->
+    <string name="steel_type">Acero</string>
+    <string name="water_type">Agua</string>
+    <string name="bug_type">Bicho</string>
+    <string name="dragon_type">Dragón</string>
+    <string name="electric_type">Eléctrico</string>
+    <string name="ghost_type">Fantasma</string>
+    <string name="fairy_type">Hada</string>
+    <string name="fire_type">Fuego</string>
+    <string name="ice_type">Hielo</string>
+    <string name="fighting_type">Lucha</string>
+    <string name="normal_type">Normal</string>
+    <string name="grass_type">Planta</string>
+    <string name="psychic_type">Psíquico</string>
+    <string name="rock_type">Roca</string>
+    <string name="dark_type">Siniestro</string>
+    <string name="ground_type">Tierra</string>
+    <string name="poison_type">Veneno</string>
+    <string name="flying_type">Volador</string>
+
+    <!-- Content description -->
+    <string name="cd_clear_all">limpiar todo</string>
+    <string name="cd_select">seleccionar</string>
+    <string name="cd_collapse">Collapsar</string>
+
+    <string name="clear">limpiar todo</string>
+    <string name="offensive_side">Ofensivo</string>
+    <string name="defensive_side">Defensivo</string>
+    <string name="deals_damage">Hace x%s daño a</string>
+    <string name="takes_damage">Recibe x%s daño de</string>
+    <string name="select_by_type_title">Selecciona el tipo</string>
+    <string name="list_legend">(M): Mega Evolución\n(A): Forma Alolan\n(G): Forma Galar</string>
+
+</resources>
