@@ -30,7 +30,6 @@ import com.watch_dex.core.presentation.util.view.WatchDexScalingList
 import com.watch_dex.feature_home.presentation.model.Effectiveness
 import com.watch_dex.feature_home.presentation.state.HomeEvent
 import com.watch_dex.feature_home.presentation.state.HomeState
-import com.watch_dex.feature_home.presentation.state.Side
 import com.watch_dex.feature_main.presentation.view.MainViewModel
 import com.watch_dex.theme.WearAppTheme
 import java.util.*
@@ -44,7 +43,6 @@ fun HomeScreen(
 
     HomeScreen(
         state,
-        state.side == Side.Offensive,
         { viewModel.onEvent(HomeEvent.SelectByPokemon(navController)) },
         { viewModel.onEvent(HomeEvent.SelectByType(navController)) },
         { viewModel.onEvent(HomeEvent.SelectOffensive) },
@@ -55,7 +53,6 @@ fun HomeScreen(
 @Composable
 fun HomeScreen(
     state: HomeState,
-    isOffensive: Boolean,
     onSelectByPokemon: () -> Unit,
     onSelectByType: () -> Unit,
     onSelectOffensive: () -> Unit,
@@ -74,13 +71,13 @@ fun HomeScreen(
         ) {
 
             item {
-                Selection(randomType, byPokemonEnabled, onSelectByPokemon, onSelectByType)
+                Selection(randomType, byListEnabled, onSelectByPokemon, onSelectByType)
             }
 
             if (typesSelected.isNotEmpty())
                 detailInfo(
                     pokemonName, typesSelected, isOffensive,
-                    getBalanceMap(), onSelectOffensive, onSelectDefensive
+                    balanceMap, onSelectOffensive, onSelectDefensive
                 )
         }
     }

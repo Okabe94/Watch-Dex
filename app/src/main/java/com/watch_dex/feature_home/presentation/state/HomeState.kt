@@ -6,17 +6,10 @@ import java.util.*
 import kotlin.random.Random
 
 data class HomeState(
-    val side: Side = Side.Defensive,
+    val typesSelected: List<Type> = emptyList(),
+    val isOffensive: Boolean = false,
     val pokemonName: String? = null,
-    val byPokemonEnabled: Boolean = false,
+    val byListEnabled: Boolean = false,
     val randomType: Type = Type.values().random(Random(System.currentTimeMillis())),
-    val typesSelected: List<Type> = listOf(),
-    val offensiveMap: EnumMap<Effectiveness, MutableList<Type>> = EnumMap(Effectiveness::class.java),
-    val defensiveMap: EnumMap<Effectiveness, MutableList<Type>> = EnumMap(Effectiveness::class.java)
-) {
-    fun getBalanceMap() = if (side == Side.Offensive) offensiveMap else defensiveMap
-}
-
-enum class Side {
-    Offensive, Defensive
-}
+    val balanceMap: EnumMap<Effectiveness, MutableList<Type>> = EnumMap(Effectiveness::class.java)
+)
