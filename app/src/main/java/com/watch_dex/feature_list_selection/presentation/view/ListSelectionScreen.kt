@@ -34,13 +34,13 @@ fun ListSelectionScreen(
     navController: NavHostController,
     viewModel: MainViewModel
 ) {
-    val state by viewModel.pokemonState.collectAsState()
+    val state by viewModel.byListScreenState.collectAsState()
     ListSelectionScreen(
         state = state,
-        onLetterClick = { letter -> viewModel.onEvent(ListSelectionEvent.OnLetterClick(letter)) },
-        onCollapseClick = { viewModel.onEvent(ListSelectionEvent.OnLetterClick(null)) },
+        onLetterClick = { letter -> viewModel.onListEvent(ListSelectionEvent.OnLetterClick(letter)) },
+        onCollapseClick = { viewModel.onListEvent(ListSelectionEvent.OnLetterClick(null)) },
         onExpandedClick = { selection ->
-            viewModel.onEvent(ListSelectionEvent.OnPokemonClick(selection))
+            viewModel.onListEvent(ListSelectionEvent.OnPokemonClick(selection))
             navController.popBackStack()
         }
     )

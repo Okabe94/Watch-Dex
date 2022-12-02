@@ -34,24 +34,19 @@ import com.watch_dex.theme.WearAppTheme
 @Composable
 fun TypeSelectionScreen(viewModel: MainViewModel, navController: NavController) {
 
-    val state by viewModel.typeState.collectAsState()
-    val homeState by viewModel.homeState.collectAsState()
+    val state by viewModel.byTypeScreenState.collectAsState()
 
     TypeSelectionScreen(
         state = state,
-        typesSelected = homeState.typesSelected,
-        isMaxSelected = viewModel.hasMaxAmountSelected(),
-        onTypeClick = { viewModel.onEvent(TypeSelectionEvent.OnTypeClick(it)) },
-        onDoneClick = { viewModel.onEvent(TypeSelectionEvent.OnDoneClick(navController)) },
-        onClearClick = { viewModel.onEvent(TypeSelectionEvent.OnClearClick) }
+        onTypeClick = { viewModel.onTypeEvent(TypeSelectionEvent.OnTypeClick(it)) },
+        onDoneClick = { viewModel.onTypeEvent(TypeSelectionEvent.OnDoneClick(navController)) },
+        onClearClick = { viewModel.onTypeEvent(TypeSelectionEvent.OnClearClick) }
     )
 }
 
 @Composable
 fun TypeSelectionScreen(
     state: TypeSelectionState,
-    typesSelected: List<Type>,
-    isMaxSelected: Boolean,
     onTypeClick: (Int) -> Unit,
     onDoneClick: () -> Unit,
     onClearClick: () -> Unit
@@ -75,11 +70,11 @@ fun TypeSelectionScreen(
                 }
 
                 itemsIndexed(state.allTypes) { index, type ->
-                    PokemonTypeToggleChip(type, type in typesSelected, index, onTypeClick)
+                    PokemonTypeToggleChip(type, type in state.selected, index, onTypeClick)
                 }
             }
 
-            BottomSelectionOptions(typesSelected, isMaxSelected, onDoneClick, onClearClick)
+            BottomSelectionOptions(state.selected, state.hasMaxAmount, onDoneClick, onClearClick)
         }
     }
 }
