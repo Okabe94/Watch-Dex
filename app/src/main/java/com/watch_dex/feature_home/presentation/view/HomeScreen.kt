@@ -39,14 +39,14 @@ fun HomeScreen(
     navController: NavHostController,
     viewModel: MainViewModel
 ) {
-    val state by viewModel.homeState.collectAsState()
+    val state by viewModel.homeScreenState.collectAsState()
 
     HomeScreen(
         state,
-        { viewModel.onEvent(HomeEvent.SelectByPokemon(navController)) },
-        { viewModel.onEvent(HomeEvent.SelectByType(navController)) },
-        { viewModel.onEvent(HomeEvent.SelectOffensive) },
-        { viewModel.onEvent(HomeEvent.SelectDefensive) }
+        { viewModel.onHomeEvent(HomeEvent.SelectByPokemon(navController)) },
+        { viewModel.onHomeEvent(HomeEvent.SelectByType(navController)) },
+        { viewModel.onHomeEvent(HomeEvent.SelectOffensive) },
+        { viewModel.onHomeEvent(HomeEvent.SelectDefensive) }
     )
 }
 

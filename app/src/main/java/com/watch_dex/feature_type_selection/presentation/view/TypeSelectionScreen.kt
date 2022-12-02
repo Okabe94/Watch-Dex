@@ -34,22 +34,19 @@ import com.watch_dex.theme.WearAppTheme
 @Composable
 fun TypeSelectionScreen(viewModel: MainViewModel, navController: NavController) {
 
-    val state by viewModel.byTypeState.collectAsState()
-//    val homeState by viewModel.homeState.collectAsState()
+    val state by viewModel.byTypeScreenState.collectAsState()
 
     TypeSelectionScreen(
         state = state,
-        isMaxSelected = viewModel.hasMaxAmountSelected(),
-        onTypeClick = { viewModel.onEvent(TypeSelectionEvent.OnTypeClick(it)) },
-        onDoneClick = { viewModel.onEvent(TypeSelectionEvent.OnDoneClick(navController)) },
-        onClearClick = { viewModel.onEvent(TypeSelectionEvent.OnClearClick) }
+        onTypeClick = { viewModel.onTypeEvent(TypeSelectionEvent.OnTypeClick(it)) },
+        onDoneClick = { viewModel.onTypeEvent(TypeSelectionEvent.OnDoneClick(navController)) },
+        onClearClick = { viewModel.onTypeEvent(TypeSelectionEvent.OnClearClick) }
     )
 }
 
 @Composable
 fun TypeSelectionScreen(
     state: TypeSelectionState,
-    isMaxSelected: Boolean,
     onTypeClick: (Int) -> Unit,
     onDoneClick: () -> Unit,
     onClearClick: () -> Unit
@@ -77,7 +74,7 @@ fun TypeSelectionScreen(
                 }
             }
 
-            BottomSelectionOptions(state.selected, isMaxSelected, onDoneClick, onClearClick)
+            BottomSelectionOptions(state.selected, state.hasMaxAmount, onDoneClick, onClearClick)
         }
     }
 }

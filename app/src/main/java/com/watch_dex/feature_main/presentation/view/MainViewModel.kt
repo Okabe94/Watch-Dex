@@ -7,7 +7,6 @@ import com.watch_dex.core.data.BalanceManager
 import com.watch_dex.core.data.Type
 import com.watch_dex.core.data.model.PokemonFromList
 import com.watch_dex.core.presentation.util.navigation.Screen
-import com.watch_dex.feature_home.presentation.model.Effectiveness
 import com.watch_dex.feature_home.presentation.state.HomeEvent
 import com.watch_dex.feature_home.presentation.state.HomeState
 import com.watch_dex.feature_list_selection.presentation.event.ListSelectionEvent
@@ -15,7 +14,6 @@ import com.watch_dex.feature_list_selection.presentation.state.ListSelectionStat
 import com.watch_dex.feature_type_selection.data.repository.PokemonRepositoryImpl
 import com.watch_dex.feature_type_selection.presentation.state.TypeSelectionEvent
 import com.watch_dex.feature_type_selection.presentation.state.TypeSelectionState
-import java.util.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -24,87 +22,59 @@ private const val MAX_TYPE_AMOUNT = 2
 class MainViewModel : ViewModel() {
     private val balanceManager = BalanceManager()
     private val repository = PokemonRepositoryImpl()
+
     private val allPokemonFromList = mutableListOf<PokemonFromList>()
+    private val typesSelectedState = MutableStateFlow(listOf<Type>())
 
-    // HomeScreenState
-    // ByTypeScreenState
-    // ByListScreenState
-
-    // Depends on
-    // TypesSelectedState
-
-    private val _typeSelectedState = MutableStateFlow(listOf<Type>())
-
+    // Screen states
     private val _homeScreenState = MutableStateFlow(HomeState())
-    private val _byTypeScreenState = MutableStateFlow(TypeSelectionState())
-    private val _byListScreenState = MutableStateFlow(ListSelectionState())
+    private val _typeScreenState = MutableStateFlow(TypeSelectionState())
+    private val _listScreenState = MutableStateFlow(ListSelectionState())
+    // ****
 
-    val byTypeState = combine(_byTypeScreenState, _typeSelectedState) { state, selected ->
-        TypeSelectionState(selected, state.allTypes)
+    // Public screen states
+    val homeScreenState = combine(_homeScreenState, typesSelectedState) { state, selected ->
+        HomeState(
+            selected,
+            state.isOffensive,
+            state.pokemonName,
+            state.byListEnabled,
+            state.randomType,
+            balanceManager.getBalanceMap(state.isOffensive, selected)
+        )
+    }.distinctUntilChanged { old, new ->
+        (old.isOffensive == new.isOffensive) && (old.pokemonName == new.pokemonName)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), HomeState())
+
+    val byTypeScreenState = combine(_typeScreenState, typesSelectedState) { state, selected ->
+        TypeSelectionState(selected, selected.size >= MAX_TYPE_AMOUNT, state.allTypes)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), TypeSelectionState())
 
-
-    //    private val _byTypeState = MutableStateFlow(TypeSelectionState())
-    val typeState = _byTypeScreenState.asStateFlow()
-
-    private val _homeState = MutableStateFlow(HomeState())
-    val homeState = _homeState.asStateFlow()
-
-    private val _byListState = MutableStateFlow(ListSelectionState())
-    val pokemonState = _byListState.asStateFlow()
-
-//    val homeState = combine(_typeSelected, _homeState) { typeSelected, home ->
-//        HomeState(
-//            typeSelected.typesSelected,
-//            home.isOffensive,
-//            home.pokemonName,
-//            home.byListEnabled,
-//            home.randomType,
-//            home.balanceMap
-//        )
-//    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+    val byListScreenState = _listScreenState.asStateFlow()
+    // ****
 
     init {
         processAllPokemon()
         processAllTypes()
     }
 
-    private fun getTypesSelected() = _typeSelectedState.value
-
     private fun getPokemonByChar(char: Char?) {
         val newToDisplay = if (char == null) emptyList()
         else allPokemonFromList
             .filter { it.name.startsWith(char, true) }
             .sortedBy { it.name }
-        _byListState.update { current ->
+        _listScreenState.update { current ->
             current.copy(letterSelected = char, pokemonDisplayed = newToDisplay)
         }
     }
 
     private fun handleLetterClick(char: Char?) {
-        val newLetterSelected = if (char == _byListState.value.letterSelected) null else char
+        val newLetterSelected = if (char == _listScreenState.value.letterSelected) null else char
         getPokemonByChar(newLetterSelected)
     }
 
-    private fun updateHomeState(
-        pokemonName: String? = null,
-        typesSelected: List<Type> = listOf(),
-        offensiveMap: EnumMap<Effectiveness, MutableList<Type>> = EnumMap(Effectiveness::class.java),
-        defensiveMap: EnumMap<Effectiveness, MutableList<Type>> = EnumMap(Effectiveness::class.java)
-    ) {
-        _homeState.update { current ->
-            current.copy(
-                pokemonName = pokemonName,
-                typesSelected = typesSelected,
-                balanceMap = offensiveMap
-//                offensiveMap = offensiveMap,
-//                defensiveMap = defensiveMap
-            )
-        }
-    }
-
     private fun processAllTypes() = process {
-        _byTypeScreenState.update { current -> current.copy(allTypes = repository.getAllTypes()) }
+        _typeScreenState.update { current -> current.copy(allTypes = repository.getAllTypes()) }
     }
 
     private fun processAllPokemon() = process(::onCompletionAllPokemon) {
@@ -115,51 +85,12 @@ class MainViewModel : ViewModel() {
     }
 
     private fun onCompletionAllPokemon(it: Throwable?) {
-        if (it == null) _homeState.update { current ->
+        if (it == null) _homeScreenState.update { current ->
             current.copy(byListEnabled = true)
         }
     }
 
-    private fun clearSelection() {
-        _typeSelectedState.update { emptyList() }
-//        val emptyMap: EnumMap<Effectiveness, MutableList<Type>> = EnumMap(Effectiveness::class.java)
-//        updateHomeState(
-//            typesSelected = emptyList(),
-//            offensiveMap = emptyMap,
-//            defensiveMap = emptyMap
-//        )
-    }
-
-    private fun handleListSelection(selection: PokemonFromList) = _homeState.update { current ->
-        current.copy(
-            pokemonName = selection.name,
-            typesSelected = selection.typeList,
-            balanceMap = balanceManager.offense(selection.typeList)
-//            offensiveMap = balanceManager.offense(selection.typeList),
-//            defensiveMap = balanceManager.defense(selection.typeList)
-        )
-    }
-
-    private fun handleTypeSelection(position: Int) {
-        val selected = _byTypeScreenState.value.allTypes[position]
-        val current = _typeSelectedState.value
-        when {
-            selected in current -> {
-                _typeSelectedState.update { types -> types - selected }
-            }
-            current.size < MAX_TYPE_AMOUNT -> {
-                _typeSelectedState.update { types -> types + selected }
-            }
-        }
-
-//        if (update) {
-//            updateHomeState(
-//                typesSelected = current,
-//                offensiveMap = balanceManager.offense(current),
-//                defensiveMap = balanceManager.defense(current)
-//            )
-//        }
-    }
+    private fun clearSelection() = typesSelectedState.update { emptyList() }
 
     private fun navigateTo(controller: NavController, route: String) =
         controller.navigate(route)
@@ -171,34 +102,47 @@ class MainViewModel : ViewModel() {
         viewModelScope.launch { action() }.invokeOnCompletion { onCompletion?.invoke(it) }
     }
 
-    private fun updateSide(isOffensive: Boolean) {
-        if (_homeState.value.isOffensive != isOffensive)
-            _homeState.update { current -> current.copy(isOffensive = isOffensive) }
+    private fun updateSide(
+        isOffensive: Boolean
+    ) = _homeScreenState.update { current -> current.copy(isOffensive = isOffensive) }
+
+    private fun handleListSelection(selection: PokemonFromList) {
+        typesSelectedState.update { selection.typeList }
+        _homeScreenState.update { current -> current.copy(pokemonName = selection.name) }
     }
 
-    fun onEvent(event: HomeEvent) {
-        when (event) {
-            is HomeEvent.SelectByPokemon -> navigateTo(
-                event.navController,
-                Screen.ListSelectionScreen.route
-            )
-            is HomeEvent.SelectByType -> navigateTo(
-                event.navController,
-                Screen.TypeSelectionScreen.route
-            )
-            HomeEvent.SelectDefensive -> updateSide(false)
-            HomeEvent.SelectOffensive -> updateSide(true)
+    private fun handleTypeSelection(position: Int) {
+        val selected = _typeScreenState.value.allTypes[position]
+        val current = typesSelectedState.value
+        when {
+            selected in current -> {
+                typesSelectedState.update { types -> types - selected }
+            }
+            current.size < MAX_TYPE_AMOUNT -> {
+                typesSelectedState.update { types -> types + selected }
+            }
         }
     }
 
-    fun onEvent(event: ListSelectionEvent) {
-        when (event) {
-            is ListSelectionEvent.OnPokemonClick -> handleListSelection(event.selection)
-            is ListSelectionEvent.OnLetterClick -> handleLetterClick(event.char)
-        }
+    fun onHomeEvent(event: HomeEvent) = when (event) {
+        is HomeEvent.SelectByPokemon -> navigateTo(
+            event.navController,
+            Screen.ListSelectionScreen.route
+        )
+        is HomeEvent.SelectByType -> navigateTo(
+            event.navController,
+            Screen.TypeSelectionScreen.route
+        )
+        HomeEvent.SelectDefensive -> updateSide(false)
+        HomeEvent.SelectOffensive -> updateSide(true)
     }
 
-    fun onEvent(event: TypeSelectionEvent) {
+    fun onListEvent(event: ListSelectionEvent) = when (event) {
+        is ListSelectionEvent.OnPokemonClick -> handleListSelection(event.selection)
+        is ListSelectionEvent.OnLetterClick -> handleLetterClick(event.char)
+    }
+
+    fun onTypeEvent(event: TypeSelectionEvent) {
         when (event) {
             TypeSelectionEvent.OnClearClick -> clearSelection()
             is TypeSelectionEvent.OnTypeClick -> handleTypeSelection(event.position)
@@ -206,5 +150,4 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun hasMaxAmountSelected() = getTypesSelected().size >= MAX_TYPE_AMOUNT
 }

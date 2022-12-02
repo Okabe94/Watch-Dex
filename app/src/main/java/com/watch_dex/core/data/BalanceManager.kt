@@ -233,7 +233,7 @@ class BalanceManager {
         }
     }
 
-    fun offense(types: List<Type>): EnumMap<Effectiveness, MutableList<Type>> {
+    private fun offense(types: List<Type>): EnumMap<Effectiveness, MutableList<Type>> {
         val calculationList = calculateRelation(types, ::getOffense)
         return fillBalanceMap(calculationList) { index, value, map ->
             when {
@@ -250,7 +250,7 @@ class BalanceManager {
         }
     }
 
-    fun defense(types: List<Type>): EnumMap<Effectiveness, MutableList<Type>> {
+    private fun defense(types: List<Type>): EnumMap<Effectiveness, MutableList<Type>> {
         val calculationList = calculateRelation(types, ::getDefense)
         return fillBalanceMap(calculationList) { index, value, map ->
             when {
@@ -273,5 +273,13 @@ class BalanceManager {
                 value == IMMUNE -> map.computeOrAdd(Effectiveness.Immune, typeList[index])
             }
         }
+    }
+
+    fun getBalanceMap(
+        isOffensive: Boolean,
+        types: List<Type>
+    ): EnumMap<Effectiveness, MutableList<Type>> {
+        return if (isOffensive) offense(types)
+        else defense(types)
     }
 }
