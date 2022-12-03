@@ -33,6 +33,6 @@
     <string name="deals_damage">Deals x%s damage to</string>
     <string name="takes_damage">Takes x%s damage from</string>
     <string name="select_by_type_title">Select the type</string>
-    <string name="list_legend">(M): Mega Evolution\n(A): Alolan Form\n(G): Galarian Form</string>
+    <string name="list_legend">(M): Mega Evolution\n(A): Alolan Form\n(G): Galarian Form\n(P): Paldean Form</string>
 
 </resources>
