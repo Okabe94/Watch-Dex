@@ -34,4 +34,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "WatchDex"
 include ":app"
-include ':app:benchmark'
