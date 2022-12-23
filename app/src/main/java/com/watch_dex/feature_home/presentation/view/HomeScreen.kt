@@ -41,6 +41,7 @@ fun HomeScreen(
     viewModel: MainViewModel
 ) {
     val state by viewModel.homeState.collectAsState()
+    val a = 1
 
     HomeScreen(
         state,
