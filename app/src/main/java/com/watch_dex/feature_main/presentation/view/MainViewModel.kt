@@ -1,11 +1,13 @@
 package com.watch_dex.feature_main.presentation.view
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.watch_dex.core.data.BalanceManager
 import com.watch_dex.core.data.model.PokemonFromList
 import com.watch_dex.core.presentation.util.navigation.Screen
+import com.watch_dex.feature_home.data.datasource.dao.PokemonDao
 import com.watch_dex.feature_home.presentation.state.HomeEvent
 import com.watch_dex.feature_home.presentation.state.HomeState
 import com.watch_dex.feature_list_selection.presentation.event.ListSelectionEvent
@@ -14,12 +16,17 @@ import com.watch_dex.feature_main.presentation.state.MainSelectedState
 import com.watch_dex.feature_type_selection.data.repository.PokemonRepositoryImpl
 import com.watch_dex.feature_type_selection.presentation.state.TypeSelectionEvent
 import com.watch_dex.feature_type_selection.presentation.state.TypeSelectionState
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 private const val MAX_TYPE_AMOUNT = 2
 
-class MainViewModel : ViewModel() {
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val pokemonDao: PokemonDao
+) : ViewModel() {
     private val balanceManager = BalanceManager()
     private val repository = PokemonRepositoryImpl()
 
@@ -57,8 +64,17 @@ class MainViewModel : ViewModel() {
     // ****
 
     init {
+        create()
         processAllPokemon()
         processAllTypes()
+    }
+
+    private fun create() {
+        viewModelScope.launch {
+            pokemonDao.getAllPokemon().collectLatest {
+                Log.e("DATA", it.toString())
+            }
+        }
     }
 
     private fun getPokemonByChar(char: Char?) {
@@ -135,10 +151,12 @@ class MainViewModel : ViewModel() {
             event.navController,
             Screen.ListSelectionScreen.route
         )
+
         is HomeEvent.SelectByType -> navigateTo(
             event.navController,
             Screen.TypeSelectionScreen.route
         )
+
         HomeEvent.SelectDefensive -> updateSide(false)
         HomeEvent.SelectOffensive -> updateSide(true)
     }

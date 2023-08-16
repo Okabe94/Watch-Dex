@@ -6,7 +6,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import com.watch_dex.feature_main.presentation.view.MainScreen
 import com.watch_dex.feature_main.presentation.view.MainViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
 

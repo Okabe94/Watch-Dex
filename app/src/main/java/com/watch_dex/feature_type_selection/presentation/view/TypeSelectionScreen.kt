@@ -20,7 +20,14 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.wear.compose.material.*
+import androidx.wear.compose.foundation.lazy.itemsIndexed
+import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
+import androidx.wear.compose.material.Icon
+import androidx.wear.compose.material.ListHeader
+import androidx.wear.compose.material.MaterialTheme
+import androidx.wear.compose.material.Text
+import androidx.wear.compose.material.ToggleChip
+import androidx.wear.compose.material.ToggleChipDefaults
 import com.watch_dex.R
 import com.watch_dex.core.data.Type
 import com.watch_dex.core.presentation.util.view.ClickableRoundedIcon
