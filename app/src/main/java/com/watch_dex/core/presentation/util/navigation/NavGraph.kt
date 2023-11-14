@@ -20,13 +20,13 @@ fun SetupNavGraph(
         startDestination = Screen.HomeScreen.route
     ) {
         composable(route = Screen.HomeScreen.route) {
-            HomeScreen(navController, viewModel)
+            HomeScreen(viewModel, navController)
         }
         composable(route = Screen.TypeSelectionScreen.route) {
             TypeSelectionScreen(viewModel, navController)
         }
         composable(route = Screen.ListSelectionScreen.route) {
-            ListSelectionScreen(navController, viewModel)
+            ListSelectionScreen(viewModel, navController)
         }
     }
 }

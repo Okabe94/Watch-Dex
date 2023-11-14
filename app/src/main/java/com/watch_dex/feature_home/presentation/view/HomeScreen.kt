@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalComposeUiApi::class)
+@file:OptIn(ExperimentalComposeUiApi::class, ExperimentalComposeUiApi::class)
 
 package com.watch_dex.feature_home.presentation.view
 
@@ -8,14 +8,26 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -28,25 +40,27 @@ import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.Card
+import androidx.wear.compose.material.CardDefaults
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.watch_dex.R
 import com.watch_dex.core.data.Type
+import com.watch_dex.core.domain.dto.PokemonDTO
 import com.watch_dex.core.presentation.util.view.IndicatorScaffold
 import com.watch_dex.core.presentation.util.view.NameWithTypeText
 import com.watch_dex.core.presentation.util.view.VSpacer
 import com.watch_dex.core.presentation.util.view.WatchDexScalingList
-import com.watch_dex.feature_home.presentation.model.Effectiveness
+import com.watch_dex.feature_home.domain.Effectiveness
 import com.watch_dex.feature_home.presentation.state.HomeEvent
 import com.watch_dex.feature_home.presentation.state.HomeState
 import com.watch_dex.feature_main.presentation.view.MainViewModel
 import com.watch_dex.theme.WearAppTheme
-import java.util.*
+import java.util.EnumMap
 
 @Composable
 fun HomeScreen(
-    navController: NavHostController,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    navController: NavHostController
 ) {
     val state by viewModel.homeScreenState.collectAsState()
 
@@ -80,20 +94,32 @@ fun HomeScreen(
         ) {
 
             item {
-                Selection(randomType, byListEnabled, onSelectByPokemon, onSelectByType)
+                Selection(
+                    theme = theme,
+                    listEnabled = byListEnabled,
+                    onSelectByPokemon = onSelectByPokemon,
+                    onSelectByType = onSelectByType
+                )
             }
 
-            if (typesSelected.isNotEmpty())
+            if (typesSelected.isNotEmpty()) {
                 detailInfo(
-                    pokemonName, typesSelected, isOffensive,
-                    balanceMap, onSelectOffensive, onSelectDefensive
+                    theme = theme,
+                    pokemonDTO = pokemonDTO,
+                    typesSelected = typesSelected,
+                    isOffensive = isOffensive,
+                    balance = balanceMap,
+                    onSelectOffensive = onSelectOffensive,
+                    onSelectDefensive = onSelectDefensive
                 )
+            }
         }
     }
 }
 
 @Composable
 private fun SideSelectionSection(
+    themeColor: Color,
     isOffensive: Boolean,
     onOffensiveClick: () -> Unit,
     onDefensiveClick: () -> Unit
@@ -103,52 +129,89 @@ private fun SideSelectionSection(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        SideSelectionText(R.string.offensive_side, isOffensive, onOffensiveClick)
-        SideSelectionText(R.string.defensive_side, !isOffensive, onDefensiveClick)
+        SideSelectionText(
+            themeColor = themeColor,
+            labelId = R.string.offensive_side,
+            isActive = isOffensive,
+            action = onOffensiveClick
+        )
+        SideSelectionText(
+            themeColor = themeColor,
+            labelId = R.string.defensive_side,
+            isActive = !isOffensive,
+            action = onDefensiveClick
+        )
     }
 }
 
 @Composable
 private fun Selection(
-    typeColor: Type,
+    theme: Type,
     listEnabled: Boolean,
     onSelectByPokemon: () -> Unit,
     onSelectByType: () -> Unit,
 ) {
-    TypeSelectionSection(typeColor, listEnabled, onSelectByPokemon, onSelectByType)
+    TypeSelectionSection(theme, listEnabled, onSelectByPokemon, onSelectByType)
 }
 
 private fun ScalingLazyListScope.detailInfo(
-    name: String?,
+    theme: Type,
+    pokemonDTO: PokemonDTO?,
     typesSelected: List<Type>,
     isOffensive: Boolean,
     balance: EnumMap<Effectiveness, MutableList<Type>>,
     onSelectOffensive: () -> Unit,
     onSelectDefensive: () -> Unit,
 ) {
-    name?.let { item { NameWithTypeText(name = it, types = typesSelected) } }
-    item { TypesSection(typesSelected) }
-    item { SideSelectionSection(isOffensive, onSelectOffensive, onSelectDefensive) }
-    item { TypeDetailSection(isOffensive, balance) }
+    if (pokemonDTO != null) {
+        item {
+            NameWithTypeText(
+                number = pokemonDTO.number,
+                name = pokemonDTO.name,
+                region = pokemonDTO.region,
+                alternateForm = pokemonDTO.alternateForm,
+                types = pokemonDTO.types,
+                themeColor = theme.color
+            )
+        }
+    } else {
+        item { TypesSection(typesSelected) }
+    }
+
+    item {
+        SideSelectionSection(
+            themeColor = theme.color,
+            isOffensive = isOffensive,
+            onOffensiveClick = onSelectOffensive,
+            onDefensiveClick = onSelectDefensive
+        )
+    }
+    item {
+        TypeDetailSection(
+            themeColor = theme.color,
+            isOffensive = isOffensive,
+            balance = balance
+        )
+    }
 }
 
 @Composable
 private fun RowScope.SideSelectionText(
+    themeColor: Color,
     labelId: Int,
     isActive: Boolean,
     action: () -> Unit
 ) {
     val verticalPadding = if (isActive) 10.dp else 5.dp
     val shape = RoundedCornerShape(15.dp)
-    val activeColor = MaterialTheme.colors.primary
     val inactiveColor = MaterialTheme.colors.background
     Text(
         modifier = Modifier
             .weight(1F)
             .clip(shape)
             .clickable(onClick = action)
-            .border(width = 1.dp, color = MaterialTheme.colors.onBackground, shape = shape)
-            .background(if (isActive) activeColor else inactiveColor, shape)
+            .border(width = 1.dp, color = Color.White, shape = shape)
+            .background(if (isActive) themeColor else inactiveColor, shape)
             .padding(vertical = verticalPadding)
             .animateContentSize(),
         text = stringResource(id = labelId),
@@ -160,7 +223,7 @@ private fun RowScope.SideSelectionText(
 
 @Composable
 private fun TypeSelectionSection(
-    randomType: Type,
+    theme: Type,
     byPokemonEnabled: Boolean,
     byPokemonClick: () -> Unit,
     byTypeClick: () -> Unit
@@ -176,14 +239,14 @@ private fun TypeSelectionSection(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             PokemonIconButton(
-                R.drawable.ic_base_pokeball,
-                color = randomType.color,
+                drawable = R.drawable.ic_base_pokeball,
+                color = theme.color,
                 enabled = byPokemonEnabled,
                 onClick = byPokemonClick
             )
             PokemonIconButton(
-                randomType.icon,
-                color = randomType.color,
+                drawable = theme.icon,
+                color = theme.color,
                 onClick = byTypeClick
             )
         }
@@ -209,6 +272,7 @@ private fun TypesSection(typeIdentities: List<Type>) = Column(
 
 @Composable
 private fun TypeDetailSection(
+    themeColor: Color,
     isOffensive: Boolean,
     balance: EnumMap<Effectiveness, MutableList<Type>>
 ) = Column(
@@ -223,6 +287,7 @@ private fun TypeDetailSection(
                     .fillMaxWidth()
                     .padding(2.dp),
                 shape = RoundedCornerShape(5.dp),
+                backgroundPainter = ColorPainter(themeColor.copy(alpha = 0.3f)),
                 onClick = {}
             ) {
                 TypeChartDetail(isOffensive, entry.key, entry.value)
@@ -285,7 +350,9 @@ private fun TypeChartDetail(
             color = Color.White,
             style = MaterialTheme.typography.body2
         )
+
         VSpacer(height = 5.dp)
+
         toDetail.chunked(rowSize).forEach { pair ->
             Row(
                 modifier = Modifier.fillMaxWidth(),

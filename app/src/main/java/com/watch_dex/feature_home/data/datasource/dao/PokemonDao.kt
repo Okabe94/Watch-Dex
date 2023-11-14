@@ -23,7 +23,7 @@ interface PokemonDao {
     @Query("SELECT * FROM Pokemon")
     fun getAllPokemon(): Flow<List<Pokemon>>
 
-    @Query("SELECT * FROM Pokemon WHERE name LIKE :initial||'%'")
-    fun getPokemonByInitial(initial: Char): Flow<List<Pokemon>>
+    @Query("SELECT * FROM Pokemon WHERE name LIKE :initial || '%' ORDER BY name ASC")
+    fun getPokemonByInitial(initial: String): Flow<List<Pokemon>>
 
 }

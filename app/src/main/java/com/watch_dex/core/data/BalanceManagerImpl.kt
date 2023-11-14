@@ -1,26 +1,16 @@
 package com.watch_dex.core.data
 
-import com.watch_dex.core.data.Type.*
-import com.watch_dex.feature_home.presentation.model.Effectiveness
-import java.util.*
+import com.watch_dex.core.domain.BalanceManager
+import com.watch_dex.core.domain.EFFECTIVE
+import com.watch_dex.core.domain.IMMUNE
+import com.watch_dex.core.domain.NEUTRAL
+import com.watch_dex.core.domain.NOT_EFFECTIVE
+import com.watch_dex.core.domain.SUPER_EFFECTIVE
+import com.watch_dex.core.domain.SUPER_NOT_EFFECTIVE
+import com.watch_dex.feature_home.domain.Effectiveness
+import java.util.EnumMap
 
-const val SUPER_EFFECTIVE = 4.0F
-const val EFFECTIVE = 2.0F
-const val NEUTRAL = 1F
-const val NOT_EFFECTIVE = 0.5F
-const val SUPER_NOT_EFFECTIVE = 0.25F
-const val IMMUNE = 0.0F
-
-class BalanceManager {
-
-    private val typeList = listOf(
-        Bug, Dark, Dragon,
-        Electric, Fairy, Fighting,
-        Fire, Flying, Ghost,
-        Grass, Ground, Ice,
-        Normal, Poison, Psychic,
-        Rock, Steel, Water
-    )
+class BalanceManagerImpl(private val typeList: List<Type>) : BalanceManager {
 
     private val relation: List<List<Float>> = listOf(
         // BUG
@@ -241,10 +231,12 @@ class BalanceManager {
                     Effectiveness.Effective,
                     typeList[index]
                 )
+
                 value >= SUPER_NOT_EFFECTIVE && value < NEUTRAL -> map.computeOrAdd(
                     Effectiveness.NotEffective,
                     typeList[index]
                 )
+
                 value == IMMUNE -> map.computeOrAdd(Effectiveness.Immune, typeList[index])
             }
         }
@@ -258,24 +250,28 @@ class BalanceManager {
                     Effectiveness.SuperEffective,
                     typeList[index]
                 )
+
                 value >= EFFECTIVE -> map.computeOrAdd(
                     Effectiveness.Effective,
                     typeList[index]
                 )
+
                 value >= NOT_EFFECTIVE && value < NEUTRAL -> map.computeOrAdd(
                     Effectiveness.NotEffective,
                     typeList[index]
                 )
+
                 value >= SUPER_NOT_EFFECTIVE && value < NEUTRAL -> map.computeOrAdd(
                     Effectiveness.SuperNotEffective,
                     typeList[index]
                 )
+
                 value == IMMUNE -> map.computeOrAdd(Effectiveness.Immune, typeList[index])
             }
         }
     }
 
-    fun getBalanceMap(
+    override fun getBalanceMap(
         isOffensive: Boolean,
         types: List<Type>
     ): EnumMap<Effectiveness, MutableList<Type>> {

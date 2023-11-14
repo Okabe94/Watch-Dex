@@ -1,9 +1,7 @@
 plugins {
   id 'com.android.application'
   id 'org.jetbrains.kotlin.android'
-  id 'com.google.dagger.hilt.android'
   id 'com.google.devtools.ksp'
-  id 'kotlin-kapt'
 }
 
 android {
@@ -55,14 +53,10 @@ dependencies {
   implementation libs.wear.compose.foundation
   implementation libs.androidx.material.icons.core
 
-  // Dependency injection
-  implementation libs.hilt.android
-  kapt libs.hilt.compiler
-
   // Room
   implementation libs.androidx.room.runtime
   implementation libs.androidx.room.ktx
-  annotationProcessor libs.room.compiler
+  ksp libs.room.compiler
   ksp libs.room.compiler
 
   // Navigation

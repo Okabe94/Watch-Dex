@@ -5,6 +5,7 @@ package com.watch_dex.feature_list_selection.presentation.view
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -30,22 +32,24 @@ import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.Card
 import androidx.wear.compose.material.Chip
+import androidx.wear.compose.material.ChipDefaults
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.watch_dex.R
-import com.watch_dex.core.data.model.PokemonFromList
-import com.watch_dex.core.presentation.util.view.WatchDexScalingList
+import com.watch_dex.core.data.Type
+import com.watch_dex.core.domain.dto.PokemonDTO
 import com.watch_dex.core.presentation.util.view.ClickableRoundedIcon
 import com.watch_dex.core.presentation.util.view.IndicatorScaffold
 import com.watch_dex.core.presentation.util.view.NameWithTypeText
+import com.watch_dex.core.presentation.util.view.WatchDexScalingList
 import com.watch_dex.feature_list_selection.presentation.event.ListSelectionEvent
 import com.watch_dex.feature_list_selection.presentation.state.ListSelectionState
 import com.watch_dex.feature_main.presentation.view.MainViewModel
 
 @Composable
 fun ListSelectionScreen(
+    viewModel: MainViewModel,
     navController: NavHostController,
-    viewModel: MainViewModel
 ) {
     val state by viewModel.byListScreenState.collectAsState()
     ListSelectionScreen(
@@ -64,7 +68,7 @@ fun ListSelectionScreen(
     state: ListSelectionState,
     onLetterClick: (Char?) -> Unit,
     onCollapseClick: () -> Unit,
-    onExpandedClick: (PokemonFromList) -> Unit
+    onExpandedClick: (PokemonDTO) -> Unit
 ): Unit = with(state) {
     val listState = rememberScalingLazyListState()
 
@@ -78,18 +82,18 @@ fun ListSelectionScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
 
-                item { ListLegend() }
                 items(initials) { letter ->
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 10.dp)
                     ) {
-                        InitialLetterChip(letter, onLetterClick)
+                        InitialLetterChip(letter, theme.color, onLetterClick)
                         ExpandableList(
-                            pokemonDisplayed,
-                            letterSelected == letter,
-                            onExpandedClick
+                            themeColor = theme.color,
+                            list = pokemonDisplayed,
+                            visible = letterSelected == letter,
+                            onSelectFromList = onExpandedClick
                         )
                     }
                 }
@@ -121,24 +125,19 @@ private fun BoxScope.CollapseButton(letter: Char?, onclick: () -> Unit) {
 }
 
 @Composable
-private fun ListLegend() = Card(onClick = {}) {
-    Text(
-        modifier = Modifier.fillMaxWidth(),
-        textAlign = TextAlign.Center,
-        text = stringResource(id = R.string.list_legend),
-        color = MaterialTheme.colors.onBackground,
-        style = MaterialTheme.typography.caption3
-    )
-}
-
-@Composable
-private fun InitialLetterChip(letter: Char, onChipClick: (Char) -> Unit) = Chip(
+private fun InitialLetterChip(
+    letter: Char,
+    themeColor: Color,
+    onChipClick: (Char) -> Unit
+) = Chip(
+    colors = ChipDefaults.chipColors(backgroundColor = themeColor),
     modifier = Modifier.fillMaxWidth(),
     label = {
         Text(
             modifier = Modifier.fillMaxWidth(),
             text = letter.toString(),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            color = Color.White,
         )
     },
     onClick = { onChipClick(letter) }
@@ -146,9 +145,10 @@ private fun InitialLetterChip(letter: Char, onChipClick: (Char) -> Unit) = Chip(
 
 @Composable
 private fun ColumnScope.ExpandableList(
-    list: List<PokemonFromList>,
+    themeColor: Color,
+    list: List<PokemonDTO>,
     visible: Boolean,
-    onSelectFromList: (PokemonFromList) -> Unit
+    onSelectFromList: (PokemonDTO) -> Unit
 ) {
     AnimatedVisibility(visible = visible) {
         WatchDexScalingList(
@@ -159,7 +159,11 @@ private fun ColumnScope.ExpandableList(
             autoCenteringParams = null
         ) {
             items(list) { pokemon ->
-                SelectablePokemonFromList(pokemon, onSelectFromList)
+                SelectablePokemonFromList(
+                    themeColor = themeColor,
+                    pokemon = pokemon,
+                    onClick = onSelectFromList
+                )
             }
         }
     }
@@ -167,9 +171,15 @@ private fun ColumnScope.ExpandableList(
 
 @Composable
 private fun SelectablePokemonFromList(
-    pokemon: PokemonFromList,
-    onClick: (PokemonFromList) -> Unit
+    themeColor: Color,
+    pokemon: PokemonDTO,
+    onClick: (PokemonDTO) -> Unit
 ) = NameWithTypeText(
+    modifier = Modifier.clickable { onClick(pokemon) },
+    number = pokemon.number,
     name = pokemon.name,
-    types = pokemon.typeList,
-    modifier = Modifier.clickable { onClick(pokemon) })
+    region = pokemon.region,
+    alternateForm = pokemon.alternateForm,
+    types = pokemon.types,
+    themeColor = themeColor
+)

@@ -33,6 +33,5 @@
     <string name="deals_damage">Hace x%s daño a</string>
     <string name="takes_damage">Recibe x%s daño de</string>
     <string name="select_by_type_title">Selecciona el tipo</string>
-    <string name="list_legend">(M): Mega Evolución\n(A): Forma Alolan\n(G): Forma Galar</string>
 
 </resources>

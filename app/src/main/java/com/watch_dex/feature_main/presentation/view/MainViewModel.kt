@@ -1,11 +1,11 @@
 package com.watch_dex.feature_main.presentation.view
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.watch_dex.core.data.BalanceManager
-import com.watch_dex.core.data.model.PokemonFromList
+import com.watch_dex.core.data.Type
+import com.watch_dex.core.domain.BalanceManager
+import com.watch_dex.core.domain.dto.PokemonDTO
 import com.watch_dex.core.presentation.util.navigation.Screen
 import com.watch_dex.feature_home.data.datasource.dao.PokemonDao
 import com.watch_dex.feature_home.presentation.state.HomeEvent
@@ -13,44 +13,47 @@ import com.watch_dex.feature_home.presentation.state.HomeState
 import com.watch_dex.feature_list_selection.presentation.event.ListSelectionEvent
 import com.watch_dex.feature_list_selection.presentation.state.ListSelectionState
 import com.watch_dex.feature_main.presentation.state.MainSelectedState
-import com.watch_dex.feature_type_selection.data.repository.PokemonRepositoryImpl
 import com.watch_dex.feature_type_selection.presentation.state.TypeSelectionEvent
 import com.watch_dex.feature_type_selection.presentation.state.TypeSelectionState
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 private const val MAX_TYPE_AMOUNT = 2
 
-@HiltViewModel
-class MainViewModel @Inject constructor(
-    private val pokemonDao: PokemonDao
+class MainViewModel(
+    private val pokemonDao: PokemonDao,
+    private val balanceManager: BalanceManager,
+    private val theme: Type,
+    allTypes: List<Type>
 ) : ViewModel() {
-    private val balanceManager = BalanceManager()
-    private val repository = PokemonRepositoryImpl()
-
-    private val allPokemonFromList = mutableListOf<PokemonFromList>()
     private val typesSelectedState = MutableStateFlow(MainSelectedState())
 
     // Screen states
-    private val _homeScreenState = MutableStateFlow(HomeState())
-    private val _typeScreenState = MutableStateFlow(TypeSelectionState())
-    private val _listScreenState = MutableStateFlow(ListSelectionState())
+    private val _homeScreenState = MutableStateFlow(HomeState(theme = theme))
+    private val _listScreenState = MutableStateFlow(ListSelectionState(theme = theme))
+    private val _typeScreenState = MutableStateFlow(TypeSelectionState(allTypes = allTypes))
     // ****
 
     // Public screen states
     val homeScreenState = combine(_homeScreenState, typesSelectedState) { state, selected ->
         HomeState(
+            theme,
             selected.typesSelected,
             state.isOffensive,
-            selected.pokemonName,
+            selected.pokemonDTO,
             state.byListEnabled,
-            state.randomType,
             balanceManager.getBalanceMap(state.isOffensive, selected.typesSelected)
         )
     }.distinctUntilChanged()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), HomeState())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), HomeState(theme = theme))
 
     val byTypeScreenState = combine(_typeScreenState, typesSelectedState) { state, selected ->
         TypeSelectionState(
@@ -63,50 +66,28 @@ class MainViewModel @Inject constructor(
     val byListScreenState = _listScreenState.asStateFlow()
     // ****
 
-    init {
-        create()
-        processAllPokemon()
-        processAllTypes()
-    }
-
-    private fun create() {
-        viewModelScope.launch {
-            pokemonDao.getAllPokemon().collectLatest {
-                Log.e("DATA", it.toString())
-            }
-        }
-    }
-
     private fun getPokemonByChar(char: Char?) {
-        val newToDisplay = if (char == null) emptyList()
-        else allPokemonFromList
-            .filter { it.name.startsWith(char, true) }
-            .sortedBy { it.name }
-        _listScreenState.update { current ->
-            current.copy(letterSelected = char, pokemonDisplayed = newToDisplay)
+        if (char == null) {
+            _listScreenState.update { current ->
+                current.copy(letterSelected = null, pokemonDisplayed = emptyList())
+            }
+            return
+        }
+
+        viewModelScope.launch {
+            pokemonDao.getPokemonByInitial(char.toString())
+                .map { list -> list.map { it.toDTO() } }
+                .collectLatest {
+                    _listScreenState.update { current ->
+                        current.copy(letterSelected = char, pokemonDisplayed = it)
+                    }
+                }
         }
     }
 
     private fun handleLetterClick(char: Char?) {
         val newLetterSelected = if (char == _listScreenState.value.letterSelected) null else char
         getPokemonByChar(newLetterSelected)
-    }
-
-    private fun processAllTypes() = process {
-        _typeScreenState.update { current -> current.copy(allTypes = repository.getAllTypes()) }
-    }
-
-    private fun processAllPokemon() = process(::onCompletionAllPokemon) {
-        allPokemonFromList.apply {
-            clear()
-            addAll(repository.getAllPokemon())
-        }
-    }
-
-    private fun onCompletionAllPokemon(it: Throwable?) {
-        if (it == null) _homeScreenState.update { current ->
-            current.copy(byListEnabled = true)
-        }
     }
 
     private fun clearSelection() = typesSelectedState.update { current ->
@@ -116,21 +97,14 @@ class MainViewModel @Inject constructor(
     private fun navigateTo(controller: NavController, route: String) =
         controller.navigate(route)
 
-    private fun process(
-        onCompletion: ((Throwable?) -> Unit)? = null,
-        action: suspend () -> Unit
-    ) {
-        viewModelScope.launch { action() }.invokeOnCompletion { onCompletion?.invoke(it) }
-    }
-
     private fun updateSide(
         isOffensive: Boolean
     ) = _homeScreenState.update { current -> current.copy(isOffensive = isOffensive) }
 
     private fun handleListSelection(
-        selection: PokemonFromList
+        selection: PokemonDTO
     ) = typesSelectedState.update { current ->
-        current.copy(pokemonName = selection.name, typesSelected = selection.typeList)
+        current.copy(pokemonDTO = selection, typesSelected = selection.types)
     }
 
     private fun handleTypeSelection(position: Int) {
@@ -142,7 +116,7 @@ class MainViewModel @Inject constructor(
             else -> typesSelected
         }
         typesSelectedState.update { current ->
-            current.copy(pokemonName = null, typesSelected = newSelected)
+            current.copy(pokemonDTO = null, typesSelected = newSelected)
         }
     }
 
